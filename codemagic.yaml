@@ -1,0 +1,67 @@
+workflows:
+  android-release:
+    name: Quiz Hint Pro API 36 Signed APK + AAB
+    max_build_duration: 60
+
+    environment:
+      flutter: stable
+      android_signing:
+        - agecalculator_upload
+
+    scripts:
+      - name: Create Android platform files
+        script: |
+          flutter create --platforms=android --org com.soikot --project-name quizhint .
+
+      - name: Configure API 36, app name and release signing
+        script: |
+          python3 - <<'PY2'
+          from pathlib import Path
+          kts=Path("android/app/build.gradle.kts")
+          manifest=Path("android/app/src/main/AndroidManifest.xml")
+          text=kts.read_text()
+          text=text.replace("compileSdk = flutter.compileSdkVersion","compileSdk = 36")
+          text=text.replace("targetSdk = flutter.targetSdkVersion","targetSdk = 36")
+          marker="    buildTypes {"
+          signing=(
+              "    signingConfigs {\n"
+              "        create(\"release\") {\n"
+              "            storeFile = file(System.getenv(\"CM_KEYSTORE_PATH\"))\n"
+              "            storePassword = System.getenv(\"CM_KEYSTORE_PASSWORD\")\n"
+              "            keyAlias = System.getenv(\"CM_KEY_ALIAS\")\n"
+              "            keyPassword = System.getenv(\"CM_KEY_PASSWORD\")\n"
+              "        }\n"
+              "    }\n\n"
+          )
+          if 'create("release")' not in text: text=text.replace(marker,signing+marker,1)
+          text=text.replace('signingConfig = signingConfigs.getByName("debug")','signingConfig = signingConfigs.getByName("release")')
+          kts.write_text(text)
+          if manifest.exists():
+              m=manifest.read_text().replace('android:label="quizhint"','android:label="Quiz Hint Pro"')
+              manifest.write_text(m)
+          PY2
+
+      - name: Verify Android API 36
+        script: |
+          grep -n "compileSdk = 36" android/app/build.gradle.kts
+          grep -n "targetSdk = 36" android/app/build.gradle.kts
+
+      - name: Get Flutter packages
+        script: |
+          flutter pub get
+
+      - name: Generate launcher icon
+        script: |
+          dart run flutter_launcher_icons
+
+      - name: Build signed Android App Bundle
+        script: |
+          flutter build appbundle --release
+
+      - name: Build signed Android APK
+        script: |
+          flutter build apk --release
+
+    artifacts:
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/*.apk
