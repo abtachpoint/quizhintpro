@@ -1,0 +1,23 @@
+QUIZ HINT PRO — CONSUMABLE IAP PRODUCTS
+
+Product ID      Credits      Target price
+credits_5       5            $0.51
+credits_10      10           $1.01
+credits_20      20           $2.01
+credits_30      30           $3.01
+credits_40      40           $4.01
+credits_50      50           $5.01
+credits_60      60           $6.01
+credits_70      70           $7.01
+credits_80      80           $8.01
+credits_90      90           $9.01
+credits_100     100          $10.01
+
+Usage:
+1 revealed hint = 1 credit.
+
+These are consumable products, so the same pack can be purchased repeatedly.
+
+Important:
+Actual prices must be created/set in Google Play Console.
+When products are active, the app displays Google Play's localized price.
